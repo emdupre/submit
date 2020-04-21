@@ -1,6 +1,6 @@
 name: Something
 
-on: [repository_dispatch]
+on: repository_dispatch
 
 jobs:
   ping-pong:
