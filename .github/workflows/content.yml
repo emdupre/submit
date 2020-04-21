@@ -1,0 +1,11 @@
+name: Remote Dispatch Action Responder
+ 
+on: [repository_dispatch]
+ 
+jobs:
+  ping-pong:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Event Information
+        run: |
+          echo "Event '${{ github.event.action }}' received from '${{ github.event.client_payload.repository }}'"
