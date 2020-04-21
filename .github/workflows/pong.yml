@@ -10,7 +10,7 @@ jobs:
         run: |
           echo "Event '${{ github.event.action }}' received from '${{ github.event.client_payload.repository }}'"
       - name: PONG - Dispatch response to received PING
-        if: github.event.action == 'ping'
+        if: github.event.action == 'publish'
         run: |
           curl -X POST https://github.com/agahkarakuzu/test-repo-A/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
