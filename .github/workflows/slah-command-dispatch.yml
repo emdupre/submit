@@ -11,4 +11,4 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           commands: example
-          repository: agahkarakuzu/test-repo-B
+          repository: agahkarakuzu/test-repo-A
