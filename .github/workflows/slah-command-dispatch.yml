@@ -6,14 +6,17 @@ jobs:
   dispatchStuff:
     runs-on: ubuntu-latest
     steps:
-     - uses: actions/checkout@v2
-     - uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
+     - name: something
+       uses: actions/checkout@v2
+     - name: something else 
+       uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
          path: 'example.yaml'
          from: 'yaml'
          to: 'json'
-     - uses: peter-evans/repository-dispatch@v1
+     - name: one more    
+       uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
           event-type: my-event
