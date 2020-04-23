@@ -18,4 +18,4 @@ jobs:
           token: ${{ secrets.PAT }}
           event-type: my-event
           repository: agahkarakuzu/test-repo-A
-          client-payload: '"${{ steps.yaml2json.outputs.data }}"'
+          client-payload: ${{ steps.yaml2json.outputs.data }}
