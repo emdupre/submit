@@ -6,10 +6,16 @@ jobs:
   dispatchStuff:
     runs-on: ubuntu-latest
     steps:
-      - name: Dispatcher
-        uses: peter-evans/repository-dispatch@v1
-        with:
+     - uses: actions/checkout@v2
+     - uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
+       id: yaml2json
+       with:
+         path: 'example.yaml'
+         from: 'yaml'
+         to: 'json'
+     - uses: peter-evans/repository-dispatch@v1
+       with:
           token: ${{ secrets.PAT }}
           event-type: my-event
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          client-payload: '"${{ steps.yaml2json.outputs.data }}"'
