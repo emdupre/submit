@@ -1,3 +1,3 @@
 # test-repo-B
-fo
+foo
 sfs
