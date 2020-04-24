@@ -27,4 +27,4 @@ jobs:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": ${{ env.PUB_NAME }}, "pub_tag": "${{ env.PUB_TAG }}"}'
+          client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": "${{ env.PUB_NAME }}", "pub_tag": "${{ env.PUB_TAG }}"}'
