@@ -1,24 +1,26 @@
-name: Slash Command Dispatch
+name: Publish to neurolibre.com
 on:
  push:
+  tags:
+   - "pub-v*"
 
 jobs:
-  dispatchStuff:
+  buildAndDispatch:
     runs-on: ubuntu-latest
     steps:
-     - name: something
+     - name: Checkout publication repository
        uses: actions/checkout@v2
-     - name: something else 
+     - name: Convert yaml to json (publication info) 
        uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
          path: 'example.yaml'
          from: 'yaml'
          to: 'json'
-     - name: one more    
+     - name: Dispatch event publish    
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
-          event-type: my-event
+          event-type: publish
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }} }'
+          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "tag": ${GITHUB_REF##*/} }'
