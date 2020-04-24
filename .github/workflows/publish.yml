@@ -17,10 +17,12 @@ jobs:
          path: 'example.yaml'
          from: 'yaml'
          to: 'json'
+     - name: Resolve tag
+       run: echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
      - name: Dispatch event publish    
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "tag": "${GITHUB_REF##*/}" }'
+          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "tag": "$PUB_TAG" }'
