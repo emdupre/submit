@@ -1,2 +1,2 @@
 # test-repo-B
-foo
+fo
