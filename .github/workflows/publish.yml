@@ -3,7 +3,8 @@ on:
  push:
   tags:
    - "pub-v*"
-
+env:
+ PUB_NAME: ${{ github.event.repository.name }}
 jobs:
   buildAndDispatch:
     runs-on: ubuntu-latest
@@ -14,7 +15,7 @@ jobs:
        uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
-         path: 'example.yaml'
+         path: '$${{ env.PUB_NAME }}.yaml'
          from: 'yaml'
          to: 'json'
      - name: Resolve tag
@@ -26,4 +27,4 @@ jobs:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "pub_tag": "${{ env.PUB_TAG }}"}'
+          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "pub_name": ${{ env.PUB_NAME }}, "pub_tag": "${{ env.PUB_TAG }}"}'
