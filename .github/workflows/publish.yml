@@ -18,11 +18,13 @@ jobs:
          from: 'yaml'
          to: 'json'
      - name: Resolve tag
-       run: echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
+       run: |
+        echo ::set-env name=TAG_TYPE::$(echo ${GITHUB_REF/refs\/tags\/^[^-]*[^ -]/})
+        echo ::set-env name=TAG_VER::$(echo ${GITHUB_REF/refs\/tags\/\w[^-]*$/})
      - name: Dispatch event publish    
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "tag": "$PUB_TAG" }'
+          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "tag_type": "${{ env.TAG_TYPE }}","tag_ver": "${{ env.TAG_VER }}" }'
