@@ -15,7 +15,7 @@ jobs:
        uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
-         path: '$${{ env.PUB_NAME }}.yaml'
+         path: '${{ env.PUB_NAME }}.yaml'
          from: 'yaml'
          to: 'json'
      - name: Resolve release tag
