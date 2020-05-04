@@ -13,3 +13,18 @@ jobs:
     steps:
      - name: Checkout repository
        uses: actions/checkout@v2
+     - name: Compile PDF
+       run: |
+        ls
+        pandoc -s -N --template ./latex/brainhack-report-template.tex brainhack-report.md -o ./latex/brainhack-${{env.PUB_NAME}}.tex
+        cd latex
+        pdflatex brainhack-${{env.PUB_NAME}}.tex
+        bibtex brainhack-${{env.PUB_NAME}}
+        pdflatex brainhack-${{env.PUB_NAME}}.tex
+        pdflatex brainhack-${{env.PUB_NAME}}.tex
+     - uses: actions/upload-artifact@v2
+       with:
+         name: PDF
+         path: latex/brainhack-${{env.PUB_NAME}}.pdf
+        
+       
