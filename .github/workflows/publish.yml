@@ -9,8 +9,7 @@ jobs:
     
     container:
       image: pandoc/latex@sha256:361a1405d45ffeb8da8a687f7d695c92d392a8bea9c931b0df240470c9692290    
-      volumes:
-        - $GITHUB_WORKSPACE:/tmp
+
     steps:
      - name: Checkout repository
        uses: actions/checkout@v2
