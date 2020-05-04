@@ -1,30 +1,16 @@
 name: Publish to neurolibre.com
-on:
- push:
-  tags:
-   - "pub-v*"
+on: [push]
+
 env:
  PUB_NAME: ${{ github.event.repository.name }}
 jobs:
-  buildAndDispatch:
+  buildPDF:
     runs-on: ubuntu-latest
+    
+    container:
+      image: pandoc/latex@sha256:361a1405d45ffeb8da8a687f7d695c92d392a8bea9c931b0df240470c9692290    
+      volumes:
+        - $GITHUB_WORKSPACE:/tmp
     steps:
-     - name: Checkout publication repository
+     - name: Checkout repository
        uses: actions/checkout@v2
-     - name: Convert yaml to json (publication info) 
-       uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
-       id: yaml2json
-       with:
-         path: '${{ env.PUB_NAME }}.yaml'
-         from: 'yaml'
-         to: 'json'
-     - name: Resolve release tag
-       run: |
-        echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
-     - name: Dispatch event to the neurolibre.com    
-       uses: peter-evans/repository-dispatch@v1
-       with:
-          token: ${{ secrets.PAT }}
-          event-type: publish
-          repository: agahkarakuzu/test-repo-A
-          client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": "${{ env.PUB_NAME }}", "pub_tag": "${{ env.PUB_TAG }}"}'
