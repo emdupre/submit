@@ -1,0 +1,29 @@
+name: Publish to neurolibre.com
+on:
+ push:
+  tags:
+   - "pub-v*"
+
+jobs:
+  buildAndDispatch:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Checkout publication repository
+       uses: actions/checkout@v2
+     - name: Convert yaml to json (publication info) 
+       uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
+       id: yaml2json
+       with:
+         path: 'example.yaml'
+         from: 'yaml'
+         to: 'json'
+     - name: Resolve tag
+       run: |
+        echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
+     - name: Dispatch event publish    
+       uses: peter-evans/repository-dispatch@v1
+       with:
+          token: ${{ secrets.PAT }}
+          event-type: publish
+          repository: agahkarakuzu/test-repo-A
+          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "pub_tag": "${{ env.PUB_TAG }}"}'
