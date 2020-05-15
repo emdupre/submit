@@ -1,0 +1,13 @@
+{
+"welcome_team": ["mathieuboudreau",
+                "agahkarakuzu",
+                "ltetrel",
+                "pbellec"
+                ],
+"reviewers":    [{"handle":"agahkarakuzu","expertise":["qmri","software"],"affiliation":"NeuroPoly Lab, Polytechnique Montreal"},
+                 {"handle":"mathieuboudreau","expertise":["qmri","software"],"affiliation":"Montreal Heart Institute"},
+                 {"handle":"emdupre","expertise":["fmri","software"],"affiliation":"Montreal Neurological Institute, McGill"},
+                 {"handle":"ltetrel","expertise":["software"],"affiliation":"SIMEXP Lab, University of Montreal"},
+                 {"handle":"pbellec","expertise":["software","neuroimaging"],"affiliation":"SIMEXP Lab, University of Montreal"}               
+                ]                
+}
