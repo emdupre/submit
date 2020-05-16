@@ -34,11 +34,9 @@
 // #####################################################################  START
 
 // GitHub Handle (organization or person)
-// TEMPORARILY POINTS TO agahkarakuzu
 var HANDLE = "agahkarakuzu";
 
 // Target GitHub repository (handle/repo)
-// TEMPORARILY POINTS TO agahkarakuzu/submit --> neurolibre/submit
 var REPO = "submit";
 
 // GitHub Token (of a dev who has write access to the repo)
@@ -151,21 +149,28 @@ function dispatchToNeuroLibre(nlForm)
   
   if (sanityCheck(nlForm)){
     
+    var status_comment;
     initResponse = openIssueForkRepo(nlForm);
-    lockGitHubIssue(String(initResponse.issue_details.number));
+    lockGitHubIssue(initResponse.issue_details.number);
     GmailApp.sendEmail(nlForm.values[mapVal.author_email], "Your NeuroLibre submission has been received!","", {htmlBody:getMailBodySuccess(nlForm,initResponse.issue_details)});
     if (initResponse.fork_status){
+      
+      status_comment = makeComment(initResponse.issue_details.number,"Your repo has been forked successfully!");
+      
       var yaml = getYAML(nlForm,initResponse.issue_details.number,initResponse.issue_details.assignees[0].login);
       var status_yaml = putFile("roboneurotest",nlForm.values[mapVal.repo_name],yaml,nlForm.values[mapVal.repo_name] + ".yml", false, false);
-      Logger.log(status_yaml)
+      //Logger.log(status_yaml)
       var status_collab = addCollaborator("roboneurotest",nlForm.values[mapVal.repo_name],nlForm.values[mapVal.author_github]);
-      Logger.log(status_collab)
+      //Logger.log(status_collab)
       // SYNCFILES uses agahkarakuzu/submit as origin temporarily
       var status_sync = syncFiles("roboneurotest",REPO,nlForm.values[mapVal.repo_name],nlForm.values[mapVal.publication_type]);
-      Logger.log(status_sync)
+      //Logger.log(status_sync)
+      
+      status_comment = makeComment(initResponse.issue_details.number,"The forked repo has been configured. We are ready to go! I am unlocking the conversation.");
+      var status_unlock = unlockIssue(initResponse.issue_details.number);
       
     }else{
-    
+     status_comment = makeComment(initResponse.issue_details.number,"Hmm...Looks like thigs went sideways and I could not fork your repo despite successful submission.");
     }
              
   }else {
@@ -286,7 +291,7 @@ function lockGitHubIssue(issue_number){
              }
     };
   
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+issue_number+"/lock", options);  
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);  
   //Logger.log(response.getContentText())
 
 }
@@ -391,7 +396,7 @@ function sanityCheck(nlForm){
           "You can open an issue on <code>neurolibre/submit</code> repository to reach out to us.";  
     GmailApp.sendEmail(nlForm.values[mapVal.author_email], "Your NeuroLibre submission has failed!","", {htmlBody:getMailBodyFailure(nlForm,msg)});
     }else if (blacklist == null){
-    Logger.log("I could not read the json file, you should probably kill the operation.");
+    //Logger.log("I could not read the json file, you should probably kill the operation.");
     }
 
 return flag;  
@@ -534,7 +539,7 @@ function getFile(owner,repo,file,isjson,bypass){
   var answer;
   var decoded;
   var response = UrlFetchApp.fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + file);
-  Logger.log("GETFILE" + response.getContentText());
+  //Logger.log("GETFILE" + response.getContentText());
   
   if (response.getResponseCode() == 200){
   
@@ -596,7 +601,7 @@ function putFile(owner,repo,content,path, isjson, bypass){
     };
   
     var response = UrlFetchApp.fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path,options);
-    Logger.log("PUTFILE" + response.getContentText());
+    //Logger.log("PUTFILE" + response.getContentText());
     var status = response.getResponseCode();
 
 return status;
@@ -704,7 +709,7 @@ function addCollaborator(org,repo,user){
   };
   
   var response = UrlFetchApp.fetch("https://api.github.com/repos/"+org+"/"+repo+"/collaborators/" + user, options);
-  Logger.log(response.getContentText());
+  //Logger.log(response.getContentText());
   var answer;
   response.getResponseCode()==201 ? answer = true : answer=false;
     
@@ -732,5 +737,50 @@ function syncFiles(org,origin_repo,target_repo,pub_type){
     status = putFile(org,target_repo,content,fileList[i].to,false,true);
 
   }
+  
 return status;  
+}
+
+function makeComment(issue_number,body){
+// POST /repos/:owner/:repo/issues/:issue_number/comments
+   var payload = {
+  "body": body
+  };
+  
+  var options = {
+  "method": "post",
+  "contentType": "application/json",
+  "payload": JSON.stringify(payload),
+  "headers" : {
+   Authorization: "token " + TOKEN
+   },
+  "muteHttpExceptions": true // Do not break the workflow if cannot invite
+  };
+  
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/" + String(issue_number) + "/comments", options);
+  //Logger.log(response.getContentText());
+  var answer;
+  response.getResponseCode()==201 ? answer = true : answer=false;
+    
+return answer;
+  
+
+}
+
+function unlockIssue(issue_number){
+// DELETE /repos/:owner/:repo/issues/:issue_number/lock
+  
+   var options = {
+        "method": "delete",
+        "contentType": "application/vnd.github.sailor-v-preview+json",
+        "headers" : {
+             Authorization: "token " + TOKEN
+             }
+    };
+  
+  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);  
+  var answer;
+  response.getResponseCode()==204 ? answer = true : answer=false;
+
+return answer;  
 }
