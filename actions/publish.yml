@@ -7,7 +7,7 @@ env:
  PUB_NAME: ${{ github.event.repository.name }}
 
 jobs:
-  buildAndDispatch:
+  dispatch2Website:
     runs-on: ubuntu-latest
     steps:
      - name: Checkout publication repository
@@ -19,13 +19,33 @@ jobs:
          path: '${{ env.PUB_NAME }}.yml'
          from: 'yaml'
          to: 'json'
-     - name: Resolve tag
+     - name: Resolve release tag
        run: |
         echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
-     - name: Dispatch event publish    
+     - name: Dispatch event to neurolibre.com   
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: roboneurotest/website-test
           client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": "${{ env.PUB_NAME }}", "pub_tag": "${{ env.PUB_TAG }}"}'
+  buildJupyterBook:
+    runs-on: ubuntu-latest
+    steps:  
+    - name: Chekout repo
+      uses: actions/checkout@v2
+    - name: Build site HTML
+      run: |
+         docker pull agahkarakuzu/jbuild
+         mkdir _site
+         chmod 777 -R ./_site
+         docker run --rm --security-opt label:disable \
+         -v ${{ github.workspace }}:/srv/jekyll \
+         agahkarakuzu/jbuild  
+         rsync -a $GITHUB_WORKSPACE/_site/ $GITHUB_WORKSPACE/
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.PAT }}
+        publish_dir: ./
+        commit_message: 🤖 Deploy Jupyter Book          
