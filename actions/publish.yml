@@ -25,5 +25,5 @@ jobs:
        with:
           token: ${{ secrets.PAT }}
           event-type: publish
-          repository: agahkarakuzu/test-repo-A
+          repository: roboneurotest/website-test
           client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "pub_tag": "${{ env.PUB_TAG }}"}'
