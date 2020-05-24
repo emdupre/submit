@@ -34,7 +34,7 @@
 // #####################################################################  START
 
 // GitHub Handle (organization or person)
-var HANDLE = "agahkarakuzu";
+var HANDLE = "roboneurotest";
 
 // Target GitHub repository (handle/repo)
 var REPO = "submit";
@@ -80,8 +80,8 @@ var icon_website = "https://cdn3.iconfinder.com/data/icons/black-white-social-me
 var logo_neurolibre_outline = "https://github.com/neurolibre/neurolibre.com/blob/master/static/img/favicon.png?raw=true";
 var logo_neurolibre = "https://raw.githubusercontent.com/neurolibre/docs.neurolibre.com/master/source/img/logo_neurolibre_old.png";
 var icon_docker = "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-512.png";
-var footer_publication = "https://github.com/agahkarakuzu/submit/blob/master/publication_footer.png?raw=true";
-var footer_tutorial = "https://github.com/agahkarakuzu/submit/blob/master/tutorial_footer.png?raw=true";
+var footer_publication = "https://github.com/roboneurotest/submit/blob/master/images/publication_footer.png?raw=true";
+var footer_tutorial = "https://github.com/roboneurotest/submit/blob/master/images/tutorial_footer.png?raw=true";
 // #####################################################################  END
 
 
@@ -675,7 +675,7 @@ function getYAML(nlForm, issueNumber, assignee){
   "\n  - kw1" +
   "\n  - kw2" +
   "\nsubmission:" +    
-  "\n- date: " + Utilities.formatDate(new Date(), "GMT-4", "yyyy-MM-dd") + 
+  "\n  date: " + Utilities.formatDate(new Date(), "GMT-4", "yyyy-MM-dd") + 
   "\n  id: " + issueNumber +
   "\n  assignee: " + assignee +  
   "\n  category: " + nlForm.values[mapVal.publication_type] + 
@@ -733,7 +733,7 @@ function syncFiles(org,origin_repo,target_repo,pub_type){
   
   for (var i =0; i<fileList.length; i++){
    
-    content = getFile("agahkarakuzu",origin_repo,fileList[i].from,false,true);
+    content = getFile(HANDLE,origin_repo,fileList[i].from,false,true);
     status = putFile(org,target_repo,content,fileList[i].to,false,true);
 
   }
