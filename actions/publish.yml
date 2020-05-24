@@ -3,6 +3,8 @@ on:
  push:
   tags:
    - "pub-v*"
+env:
+ PUB_NAME: ${{ github.event.repository.name }}
 
 jobs:
   buildAndDispatch:
@@ -10,15 +12,11 @@ jobs:
     steps:
      - name: Checkout publication repository
        uses: actions/checkout@v2
-     - name: Resolve name
-       run: |
-        echo ::set-env name=REPO_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}' | sed -e "s/:refs//")
-        echo "$REPO_NAME"
      - name: Convert yaml to json (publication info) 
        uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
-         path: '${{ env.REPO_NAME }}.yml'
+         path: '${{ env.PUB_NAME }}.yml'
          from: 'yaml'
          to: 'json'
      - name: Resolve tag
@@ -30,4 +28,4 @@ jobs:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: roboneurotest/website-test
-          client-payload: '{"pubinfo": ${{ steps.yaml2json.outputs.data }}, "pub_tag": "${{ env.PUB_TAG }}"}'
+          client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": "${{ env.PUB_NAME }}", "pub_tag": "${{ env.PUB_TAG }}"}'
