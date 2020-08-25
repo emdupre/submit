@@ -1,51 +1,76 @@
-name: Publish to neurolibre.com
+name: deploy-book
+
 on:
  push:
+  branches:
+    - master
+  # If your git repository has the Jupyter Book within some-subfolder next to
+  # unrelated files, you can make this run only if a file within that specific
+  # folder has been modified.
+  #
+  # paths:
+  # - content/**
   tags:
-   - "pub-v*"
+   - "v*"
 env:
  PUB_NAME: ${{ github.event.repository.name }}
 
 jobs:
-  dispatch2Website:
+
+  deploy-book:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    # Install dependencies
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        pip install -r build-requirements.txt
+
+    # Build the page
+    - name: Build the book
+      run: |
+        jupyter-book build content/
+
+    # Push the book's HTML to github-pages
+    - name: GitHub Pages action
+      uses: peaceiris/actions-gh-pages@v3.6.1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./content/_build/html
+        commit_message: 🤖 Deploy Jupyter Book
+
+  publish:
+
+    name: Publish to website
+    needs: [deploy-book]
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     runs-on: ubuntu-latest
     steps:
      - name: Checkout publication repository
        uses: actions/checkout@v2
-     - name: Convert yaml to json (publication info) 
+
+    - name: Convert yaml to json (publication info)
        uses: fabasoad/yaml-json-xml-converter-action@v1.0.0
        id: yaml2json
        with:
          path: '${{ env.PUB_NAME }}.yml'
          from: 'yaml'
          to: 'json'
+
      - name: Resolve release tag
        run: |
         echo ::set-env name=PUB_TAG::$(echo ${GITHUB_REF/refs\/tags\//})
-     - name: Dispatch event to neurolibre.com   
+
+     - name: Dispatch event to neurolibre.com
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.PAT }}
           event-type: publish
           repository: roboneurotest/website-test
           client-payload: '{"pub_info": ${{ steps.yaml2json.outputs.data }}, "pub_name": "${{ env.PUB_NAME }}", "pub_tag": "${{ env.PUB_TAG }}"}'
-  buildJupyterBook:
-    runs-on: ubuntu-latest
-    steps:  
-    - name: Chekout repo
-      uses: actions/checkout@v2
-    - name: Build site HTML
-      run: |
-         docker pull agahkarakuzu/jbuild
-         mkdir _site
-         chmod 777 -R ./_site
-         docker run --rm --security-opt label:disable \
-         -v ${{ github.workspace }}:/srv/jekyll \
-         agahkarakuzu/jbuild  
-         rsync -a $GITHUB_WORKSPACE/_site/ $GITHUB_WORKSPACE/
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.PAT }}
-        publish_dir: ./
-        commit_message: 🤖 Deploy Jupyter Book          
