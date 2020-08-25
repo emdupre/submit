@@ -45,7 +45,7 @@
 // ii  - Global variables declared by the script follow camelCase. These variables
 //       are intended for easing access to the auxiliary information. List of global
 //       variable declared by this script are:
-//          - mapVal, icon*, logo*, header*, footer*, inspectObject, binderConfig
+//          - mapVal, icon*, logo*, header*, footer*
 //
 // iii - Global variables specifying GitHub repository to which authorized
 //       API calls will point (e.g. neurolibre/submit) are CAPITALIZED.
@@ -100,63 +100,16 @@ var mapVal = {
 // ---------------------------------------------------------------------
 // Global vars for icons and images
 // ##################################################################### START
-var iconBinder = "https://avatars3.githubusercontent.com/u/13699731?s=280&v=4";
-var iconJpbook = "https://jupyterbook.org/_static/logo.png";
-var iconPython = "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png";
-var iconNotebook = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/de920fda-40bd-43e8-9ed3-339bb970c3c4/dd8pdzs-cbc64bcd-86d9-4e22-a415-820e63c4e959.png";
 var iconGithub = "https://cdn2.iconfinder.com/data/icons/black-white-social-media/64/github_social_media_logo-512.png";
-var iconLicense = "https://cdn0.iconfinder.com/data/icons/customicondesign-office7-shadow-png/256/License-manager.png";
-var iconReadme = "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/273_Readme_logo-512.png";
 var iconTwitter = "https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/online_social_media_twitter-512.png";
 var iconDev = "https://cdn1.iconfinder.com/data/icons/badges-achievements-001-solid/68/Artboard_8-512.png";
 var iconWebsite = "https://cdn3.iconfinder.com/data/icons/black-white-social-media/32/www_logo_social_media-512.png";
-var iconData = "https://cdn4.iconfinder.com/data/icons/cloud-computing-2/500/cloud-arrow-down-512.png";
 var logoNeurolibreOutline = "https://github.com/neurolibre/neurolibre.com/blob/master/static/img/favicon.png?raw=true";
 var logoNeurolibre = "https://raw.githubusercontent.com/neurolibre/docs.neurolibre.com/master/source/img/logo_neurolibre_old.png";
-var iconDocker = "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-512.png";
 var footerPublication = "https://github.com/roboneurotest/submit/blob/master/images/publication_footer.png?raw=true";
 var iconReview = "https://cdn0.iconfinder.com/data/icons/job-seeker/256/conversation_job_seeker_employee_unemployee_work-512.png";
 var footerTutorial = "https://github.com/roboneurotest/submit/blob/master/images/tutorial_footer.png?raw=true";
 // #####################################################################  END
-
-
-// Global vars for repo inspection
-// ##################################################################### START
-
-// TODO: PUT THIS SECTION AS A JSON TO THE BASE OF THE SUBMIT REPO.
-
-var binderConfig = [
-    "environment.yml",
-    "Pipfile",
-    "Pipfile.lock",
-    "setup.py",
-    "Project.toml",
-    "REQUIRE",
-    "install.R",
-    "apt.txt",
-    "DESCRIPTION",
-    "manifest.yml",
-    "postBuild",
-    "start",
-    "runtime.txt",
-    "default.nix"
-    ];
-
-var inspectObject = {
-    "files": [
-      { "name":"Jupyter Notebook","format":".ipynb","icon":iconNotebook, "icon_size":30,"plural":"s", abs_match:false},
-      { "name":"Dockerfile","format":"Dockerfile","icon":iconDocker, "icon_size":30, "plural":"s", abs_match:false},
-      { "name":"JupyterBook config file","format":["_config.yml","toc.yml","_data/toc.yml"],  "icon":iconJpbook, "icon_size":30, "plural":"s",abs_match:true},
-      { "name":"Pip Requirements","format":"requirements.txt", "icon":iconPython, "icon_size":30, "plural":"", abs_match:true},
-      { "name":"Other config file","format": binderConfig, "icon":iconBinder, "icon_size":30, "plural":"s", abs_match:true},
-      { "name":"Readme","format": "README.md", "icon":iconReadme, "icon_size":30,  "plural":"", abs_match:true},
-      { "name":"License","format": "LICENSE", "icon":iconLicense, "icon_size":30,  "plural":"", abs_match:true},
-      { "name":"Repo2Data","format": "data_requirement.json", "icon":iconData, "icon_size":30,  "plural":"", abs_match:true},
-     ]
-
-};
-// #####################################################################  END
-
 
 // ---------------------------------------------------------------------
 // Global vars for HTML template
@@ -457,11 +410,14 @@ function inspectGitHubRepo(formValues){
    var cur_o; // Current object
 
   var flag = false;
-  for (var i =0; i < inspectObject.files.length;i++){
-    cur_f = inspectObject.files[i];
+  var response = {};
+  response = getFile(HANDLE, REPO, "file-types.json", true, false);
+
+  for (var key in response.payload){
+    cur_f = key;
     cur_o = getCollapsibleMD(response_object,cur_f,blob_url);
     content_info += cur_o;
-    if (String(inspectObject.files[i].name) === "Jupyter Notebook" && cur_o == "") flag=true;
+    if (String(key.name) === "Jupyter Notebook" && cur_o == "") flag=true;
   }
 
   response = UrlFetchApp.fetch("https://api.github.com/repos/"+ formValues.REPO_OWNER +"/"+ formValues.REPO_NAME +"/contributors");

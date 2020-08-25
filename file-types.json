@@ -1,0 +1,77 @@
+{
+  "Jupyter Notebook": {
+    "format": ".ipynb",
+    "icon": "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/de920fda-40bd-43e8-9ed3-339bb970c3c4/dd8pdzs-cbc64bcd-86d9-4e22-a415-820e63c4e959.png",
+    "icon_size": 30,
+    "plural": "s",
+    "abs_match": false
+  },
+  "Dockerfile": {
+    "format": "Dockerfile",
+    "icon": "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-512.png",
+    "icon_size": 30,
+    "plural": "s",
+    "abs_match": false
+  },
+  "JupyterBook config file": {
+    "format": [
+        "_config.yml",
+        "toc.yml",
+        "_data/toc.yml"
+    ],
+    "icon": "https://jupyterbook.org/_static/logo.png",
+    "icon_size": 30,
+    "plural": "s",
+    "abs_match": true
+  },
+  "Pip Requirements": {
+    "format": "requirements.txt",
+    "icon": "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png",
+    "icon_size": 30,
+    "plural": "",
+    "abs_match": true
+  },
+  "Other config file": {
+    "format": [
+        "environment.yml",
+        "Pipfile",
+        "Pipfile.lock",
+        "setup.py",
+        "Project.toml",
+        "REQUIRE",
+        "install.R",
+        "apt.txt",
+        "DESCRIPTION",
+        "manifest.yml",
+        "postBuild",
+        "start",
+        "runtime.txt",
+        "default.nix"
+    ],
+    "icon": "https://avatars3.githubusercontent.com/u/13699731?s=280&v=4",
+    "icon_size": 30,
+    "plural": "s",
+    "abs_match": true
+  },
+  "Readme": {
+    "format": "README.md",
+    "icon": "https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/273_Readme_logo-512.png",
+    "icon_size": 30,
+    "plural": "",
+    "abs_match": true
+  },
+  "License": {
+    "format": "LICENSE",
+    "icon": "https://cdn0.iconfinder.com/data/icons/customicondesign-office7-shadow-png/256/License-manager.png",
+    "icon_size": 30,
+    "plural": "",
+    "abs_match": true
+  },
+  "Repo2Data": {
+    "format": "data_requirement.json",
+    "icon": "https://cdn4.iconfinder.com/data/icons/cloud-computing-2/500/cloud-arrow-down-512.png",
+    "icon_size": 30,
+    "plural": "",
+    "abs_match": true
+  }
+}
