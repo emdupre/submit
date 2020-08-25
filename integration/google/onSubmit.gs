@@ -28,7 +28,7 @@
 // This script uses GitHub REST API (v3 as of May 2020) to:
 //      - Open an issue on the target repository on form submission (POST)
 //      - Fetch issue number and lock the conversation (PUT)
-//      - TODO: Update this header.Script got much bigger.
+//      - TODO: Why do we lock the conversation?
 // Please make sure that the API calls are up to date with the resources
 // described by GitHub: https://docs.github.com/.
 // -------------------------------------------------------------------------
@@ -74,7 +74,7 @@ var HANDLE = "roboneurotest";
 var REPO = "submit";
 
 // GitHub Token (of a dev who has write access to the repo)
-// This is visible on script.google.com project
+// This is visible on the script.google.com project
 var TOKEN = "REDACTED";
 
 // Note that the variable passed to the scope of this project
@@ -253,8 +253,8 @@ function runSubmissionWorkflow(formValues){
     // OPEN issue
     init_response = openIssueForkRepo(formValues);
 
-    // LOCK issue
-    lockGitHubIssue(init_response.issue_details.number);
+    // // LOCK issue
+    // lockGitHubIssue(init_response.issue_details.number);
 
     // SEND email on success
     // Fields correspond to (recipient, subject, body, options)
@@ -285,7 +285,7 @@ function runSubmissionWorkflow(formValues){
 
     // READY to go message
     status_comment = makeComment(init_response.issue_details.number,"### We are ready to go!" +
-                                "\n The forked repo has been configured. I am unlocking this conversation." +
+                                // "\n The forked repo has been configured. I am unlocking this conversation." +
                                 "\n ***" +
                                 "\n @" + welcomer + " please touch base with @" + formValues.AUTHOR_GITHUB +
                                     " to assign a reviewer to [" + HANDLE + "/" + formValues.REPO_NAME + "]" +
@@ -294,7 +294,7 @@ function runSubmissionWorkflow(formValues){
                                     "\n ***" +
                                     "\n" + getReviewerList());
 
-    var status_unlock = unlockIssue(init_response.issue_details.number);
+    // var status_unlock = unlockIssue(init_response.issue_details.number);
 
     }else{ // IF NOT forked
     status_comment = makeComment(init_response.issue_details.number,
@@ -365,9 +365,10 @@ function openIssueForkRepo(formValues){
 
     // THIS MUST BE ARRAY
     // We should decide if this is gonna be one person every time or multi.
-    // For now agahkarakuzu only.
+    // For now random member selected.
     // We can have a set of rules for this.
-    var nl_assignee = [response_file.payload.welcome_team[1]];
+    var selected_member = getRandomInt(0, response_file.payload.welcome_team.length);
+    var nl_assignee = [selected_member];
 
     body = body +
     "\n" +
@@ -382,43 +383,40 @@ function openIssueForkRepo(formValues){
    var forked = false; // init
 
    // FORK THE REPOSITORY
+   // This should be updated to fork to NeuroLibre once the workflow is finalized
    if (!inspection_results.status){
      forked = forkRepo(formValues.REPO_OWNER,formValues.REPO_NAME,"roboneurotest");
-
    }
-
 
   return {issue_details: issue_details, fork_status: forked};
 }
 // ===================================================================== END
 
-
 // ---------------------------------------------------------------------
 // LOCK CONVERSATION BY DEFAULT
 // ===================================================================== START
-function lockGitHubIssue(issue_number){
+// function lockGitHubIssue(issue_number){
 
-  // Lock issue, to be unlocked on GitHub.
-  // https://developer.github.com/v3/issues/#lock-an-issue
+//   // Lock issue, to be unlocked on GitHub.
+//   // https://developer.github.com/v3/issues/#lock-an-issue
 
-   var payload = {
-  "locked": true,
-  "active_lock_reason": "resolved"
-   }
+//    var payload = {
+//     "locked": true,
+//     "active_lock_reason": "resolved"
+//    }
 
-   var options = {
-        "method": "PUT",
-        "contentType": "application/vnd.github.sailor-v-preview+json",
-        "payload": JSON.stringify(payload),
-        "headers" : {
-             Authorization: "token " + TOKEN
-             }
-    };
+//    var options = {
+//     "method": "PUT",
+//     "contentType": "application/vnd.github.sailor-v-preview+json",
+//     "payload": JSON.stringify(payload),
+//     "headers" : {
+//           Authorization: "token " + TOKEN
+//           }
+//     };
 
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);
-  //Logger.log(response.getContentText())
-
-}
+//   var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);
+//   //Logger.log(response.getContentText())
+// }
 // ===================================================================== END
 
 // ---------------------------------------------------------------------
@@ -426,26 +424,21 @@ function lockGitHubIssue(issue_number){
 // ===================================================================== START
 
 function getGitHubInfo(repo_url){
-var answer = {"valid":false,"payload":null};
-var repo;
-var response;
+  var answer = {"valid": false, "payload": null};
+  var repo;
+  var response;
 
-repo = parseGithubUrl(repo_url);
+  repo = parseGithubUrl(repo_url);
 
+  response = UrlFetchApp.fetch("https://api.github.com/repos/" + repo.owner + "/" + repo.repo);
 
-response = UrlFetchApp.fetch("https://api.github.com/repos/" + repo.owner + "/" + repo.repo);
-
-
-if(response.getResponseCode() == 200) {
-    answer.valid = true;
-    answer.payload = JSON.parse(response);
-  }
-
-
+  if(response.getResponseCode() == 200) {
+      answer.valid = true;
+      answer.payload = JSON.parse(response);
+    }
 return answer;
 }
 // ===================================================================== END
-
 
 // ---------------------------------------------------------------------
 // CRAWL GITHUB REPO TREE
@@ -541,7 +534,6 @@ function sanityCheck(author_github, author_email, repo_url){
     flag = false;
     msg = msg + "\n Provided GitHub repository (" + repo_url + ") does not exist.";
  }else{
-
     owner = response_repo.payload.owner.login;
     name  = response_repo.payload.name;
  }
@@ -579,10 +571,8 @@ return {valid: flag, repo_owner: owner, repo_name: name };
 
 function getMailBodySuccess(formValues,response_object)
 {
-
 // This functions returns an HTML mail body on a successful submission.
 // Mail content is populated by the information fetched from the spreadsheet.
-
 var html_body=
     "<body>" +
      header +
@@ -642,7 +632,6 @@ function url_exists(url) {
 }
 
 function getCollapsibleMD(response_object,obj,blob_url){
-
   var items = [];
 
   if (obj.format instanceof Array && obj.format.length >1){
@@ -656,7 +645,6 @@ function getCollapsibleMD(response_object,obj,blob_url){
 
   }else{
       items = getFileArray(response_object, obj.format,obj.abs_match);
-
   }
 
  if (items.length!=0){
@@ -707,15 +695,19 @@ function getFileArray(obj,extension,abs_match) {
 return file_info;
 }
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function getFile(owner,repo,file,isjson,bypass){
 // See GitHub API for call details:
 // https://docs.github.com/en/rest/reference/repos#get-repository-content
-// TODO: FIX VARIABLE NAMING HERE
 
-  var answer = {"valid":true, "payload": null};
+  var answer = {"valid": true, "payload": null};
   var decoded;
   var response = UrlFetchApp.fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + file);
-  //Logger.log("GETFILE" + response.getContentText());
 
   if (response.getResponseCode() == 200){
 
@@ -723,20 +715,19 @@ function getFile(owner,repo,file,isjson,bypass){
     if (!bypass){
       decoded = Utilities.base64Decode(jsn.content);
     }else{
-     // In case need to keep content untouched.
+     // In case we need to keep content untouched, don't decode
       decoded = jsn.content;
     }
 
     if (!bypass){
-    if (isjson){
-      answer.payload = JSON.parse(Utilities.newBlob(decoded).getDataAsString());
-    }else{
-      answer.payload = Utilities.newBlob(decoded).getDataAsString();
-    }
-    }else{ // IF BYPASS
-      answer.payload = decoded;
-    }
-
+      if (isjson){
+        answer.payload = JSON.parse(Utilities.newBlob(decoded).getDataAsString());
+      }else{
+        answer.payload = Utilities.newBlob(decoded).getDataAsString();
+      }
+      }else{ // IF BYPASS
+        answer.payload = decoded;
+      }
    }else{ // NOT RESPONSE 200
       answer.valid = false;
   }
@@ -762,8 +753,8 @@ function putFile(owner,repo,content,path, isjson, bypass){
     var payload = {  // TODO: Update this to roboneuro
         "message": msg,
         "committer": {
-          "name": "Agah Karakuzu",
-          "email": "agahkarakuzu@gmail.com"
+          "name": "Robo NeuroLibre",
+          "email": "roboneurolibre@gmail.com"
         },
         "content": encoded
       };
@@ -777,7 +768,7 @@ function putFile(owner,repo,content,path, isjson, bypass){
              }
     };
 
-    var response = UrlFetchApp.fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path,options);
+    var response = UrlFetchApp.fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path, options);
     //Logger.log("PUTFILE" + response.getContentText());
     var status = response.getResponseCode();
 
@@ -914,7 +905,9 @@ function syncFiles(org,origin_repo,target_repo,pub_type){
   // Get some files from the template repo for github actions etc.
   var answer = {"valid":true, "payload": null};
   var response;
-  var file_list = [{from: "actions/publish.yml", to: ".github/workflows/publish.yml"}
+  var file_list = [
+    { from: "actions/publish.yml", to: ".github/workflows/publish.yml" },
+    { from: "build-requirements.txt", to: "build-requirements.txt" }
                  ];
   if (pub_type == "Publication"){
       file_list.push({from: "images/publication_template.png", to: target_repo + "_featured.png"});
@@ -959,23 +952,23 @@ function makeComment(issue_number,body){
 return answer;
 }
 
-function unlockIssue(issue_number){
-// DELETE /repos/:owner/:repo/issues/:issue_number/lock
+// function unlockIssue(issue_number){
+// // DELETE /repos/:owner/:repo/issues/:issue_number/lock
 
-   var options = {
-        "method": "delete",
-        "contentType": "application/vnd.github.sailor-v-preview+json",
-        "headers" : {
-             Authorization: "token " + TOKEN
-             }
-    };
+//    var options = {
+//         "method": "delete",
+//         "contentType": "application/vnd.github.sailor-v-preview+json",
+//         "headers" : {
+//              Authorization: "token " + TOKEN
+//              }
+//     };
 
-  var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);
-  var answer;
-  response.getResponseCode()==204 ? answer = true : answer=false;
+//   var response = UrlFetchApp.fetch("https://api.github.com/repos/"+HANDLE+"/"+REPO+"/issues/"+String(issue_number)+"/lock", options);
+//   var answer;
+//   response.getResponseCode()==204 ? answer = true : answer=false;
 
-return answer;
-}
+// return answer;
+// }
 
 function getReviewerList(){
 
